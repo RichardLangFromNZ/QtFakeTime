@@ -1,0 +1,15 @@
+/build
+*.jsc
+*.qmlc
+*.autosave
+/src/LogMaker/temp
+/src/LogMaker/images/temp
+/scripts/.idea
+CMakeLists.txt.user
+**/ignore
+venv
+.idea
+
+# PoDoFo library is sourced from external SVN repositry and checked out into source tree (rather than build tree) in
+# order to include it in any project source archive.
+**/podofo-0.9.6
