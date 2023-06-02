@@ -109,13 +109,13 @@ QtFakeTime also includes a `set` method that sets "current" time (as reported by
 ```
 TEST(Foo_tests, test_for__function_that_only_accepts_files_less_than_4_weeks_old)
 {
-    QString fileName = <i>some file from test resources with arbitrary timestamp</i>;
+    QString fileName = some file from test resources with arbitrary timestamp;
 
-    QtFakeTime::set(<i>27 days after file timestamp</i>)
+    QtFakeTime::set(27 days after file timestamp)
 
     ASSERT_TRUE(function_that_only_accepts_files_less_than_4_weeks_old(fileName));
 
-    QtFakeTime::set(<i>29 days after file timestamp</i>)
+    QtFakeTime::set(29 days after file timestamp)
 
     ASSERT_FALSE(function_that_only_accepts_files_less_than_4_weeks_old(fileName));
 
@@ -126,7 +126,7 @@ Note that even once faked with a `fastForward` or `set` call, current time still
 
 The library also has a `reset` function to return time to real time.
 
-##TODO
+## TODO
 
 The library currently supports faking:
 
