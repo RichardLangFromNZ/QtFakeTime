@@ -238,7 +238,7 @@ inline static void QTimer_start_shim(QTimer* timer)
     reinterpret_cast<QTimerIdAccessor*>(timer)->id = fakeActiveTimerID;
 
     // Have to use event handler connected to QObject::destroyed() signal to remove timer from <qTimerDueTimes> on destruction, rather than shimming QTimer::~QTimer()
-    // destructors (_ZN6QTimerD0Ev etc.), as the shim destructors will not be invoked in the case of dynamically allocated timers, (they instead invoke their
+    // destructors (_ZN6QTimerD0Ev etc.), as the shim destructors is not invoked in the case of dynamically allocated timers, (they instead invoke their
     // real virtual destructor via their virtual method table.)
     QObject::connect(timer, &QObject::destroyed, [](QObject* obj)   {qTimerDueTimes.erase((QTimer*)obj);});
 }
@@ -846,12 +846,22 @@ Q_COREAPP_STARTUP_FUNCTION(setupIdleTimer)
 
 static void qApplicationTeardown(void)
 {
+    // In gtest style unit test build global QApplication object may be set up & torn down for every test case, rather than just once
+    // at program termination
+
+    // Opportunity to clean up/reset QtFakeTime
+
     fakedTimeAtLastIdleTimerTick   = -1;
     realTimeAtLastIdleTimerTick    = -1;
 
     // <qElapsedTimerStartTimes> is problematic as QElapsedTimer doesn't have any destructor we can shim/hook to remove entries
     // from the map as corresponding QElapsedTimer instances are destroyed, and thus tends to fill up with stale pointers.
-    // Opportunity to purge it here, as in gtest style unit test build global QApplication object may be set up & torn down for
-    // every case.....
+    // Opportunity to purge it here.
     qElapsedTimerStartTimes.clear();
+
+    // <qTimerDueTimes> *SHOULD* be self maintaining, as every time we add a QTimer pointer to it we connect a cleanup lambda function
+    // to the timer's destroyed() signal.  This appeared to work reliably on a Ubuntu 20.04(/GCC9) test host, however on shift to
+    // Ubuntu 22.04(/GCC 11) occasionally have zombie pointers remaining in map at QApplication teardown, that trigger segmentation
+    // faults when referenced in QtFakeTime operations in subsequent tests.
+    qTimerDueTimes.clear();
 }
